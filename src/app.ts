@@ -6,29 +6,30 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
 
 const fetch = require('node-fetch');
+const defaults = require('../public/defaults.json');
 
 /**
  * The structure of an object in the database.
  */
 type ObjectDescriptor = {
-    resourceId: string;
-    attachPoint: string;
-    scale: {
-        x: number;
-        y: number;
-        z: number;
-    };
-    rotation: {
-        x: number;
-        y: number;
-        z: number;
-    };
-    position: {
-        x: number;
-        y: number;
-        z: number;
-    };
-    previewMargin: number;
+	resourceId: string;
+	attachPoint: string;
+	scale: {
+		x: number;
+		y: number;
+		z: number;
+	};
+	rotation: {
+		x: number;
+		y: number;
+		z: number;
+	};
+	position: {
+		x: number;
+		y: number;
+		z: number;
+	};
+	previewMargin: number;
 };
 
 /**
@@ -42,7 +43,6 @@ export default class WearAHat {
     private attachedObjects = new Map<MRE.Guid, MRE.Actor>();
 
     // Load the database of objects.
-    // tslint:disable-next-line:no-var-requires variable-name
     private ObjectDatabase: { [key: string]: ObjectDescriptor } = {};
 
     // Options
@@ -68,10 +68,10 @@ export default class WearAHat {
                     .then((res: any) => res.json())
                     .then((json: any) => {
                         // combine custom content pack plus default controls (modded to X only)
-                        this.ObjectDatabase = Object.assign({}, json, require('../public/defaults.json'));;
+                        this.ObjectDatabase = Object.assign({}, json, defaults);
                         this.started();
                     })
-           } else { return; }
+            } else { return; }
 
         });
         this.context.onUserLeft(user => this.userLeft(user));
@@ -80,7 +80,7 @@ export default class WearAHat {
     /**
      * Called when an application session starts up.
      */
-    private async started() {
+    private started() {
         this.showWearables();
     }
 
@@ -105,7 +105,7 @@ export default class WearAHat {
 
         // check for options first since order isn't guaranteed in a dict
         for (const k of Object.keys(this.ObjectDatabase)) {
-            if (k == "options"){
+            if (k === "options"){
                 const options = this.ObjectDatabase[k]
                 if (options.previewMargin){
                     this.previewMargin = options.previewMargin;
@@ -115,21 +115,21 @@ export default class WearAHat {
 
         // Loop over the hat database, creating a menu item for each entry.
         for (const objectId of Object.keys(this.ObjectDatabase)) {
-            if (objectId == "options") continue; // skip the special 'options' key
+            if (objectId === "options") { continue; } // skip the special 'options' key
 
-            const objectRecord = this.ObjectDatabase[objectId];
+            const objRecord = this.ObjectDatabase[objectId];
 
             // Create a clickable button.
-            var button;
+            let button = null;
 
             // special scaling and rotation for commands
-            let regex: RegExp = /!$/; // e.g. clear!
-            const rotation = (regex.test(objectId) && objectRecord.rotation) ? objectRecord.rotation : { x: 0, y: 0, z: 0 }
-            const scale = (regex.test(objectId) && objectRecord.scale) ? objectRecord.scale : { x: 3, y: 3, z: 3 }
+            const regex = /!$/u; // e.g. clear!
+            const rotation = (regex.test(objectId) && objRecord.rotation) ? objRecord.rotation : { x: 0, y: 0, z: 0 }
+            const scale = (regex.test(objectId) && objRecord.scale) ? objRecord.scale : { x: 3, y: 3, z: 3 }
 
             // Create a Artifact without a collider
             MRE.Actor.CreateFromLibrary(this.context, {
-                resourceId: objectRecord.resourceId,
+                resourceId: objRecord.resourceId,
                 actor: {
                     transform: {
                         local: {
@@ -159,9 +159,9 @@ export default class WearAHat {
                             position: { x, y: 1, z: 0 },
                             scale: scale
                         }
-                    },
-                    appearance: {
-                        enabled: false
+                        },
+                        appearance: {
+                            enabled: false
                     }
                 }
             });
@@ -170,7 +170,7 @@ export default class WearAHat {
             button.setBehavior(MRE.ButtonBehavior).onClick(user => this.wearObject(objectId, user.id));
 
             x += this.previewMargin;
-        }
+        }   
     }
 
     /**
@@ -180,33 +180,37 @@ export default class WearAHat {
      */
     private wearObject(objectId: string, userId: MRE.Guid) {
         // If the user selected 'clear', then early out.
-        if (objectId == "clear!") {
+        if (objectId === "clear!") {
             // If the user is wearing a hat, destroy it.
-            if (this.attachedObjects.has(userId)) this.attachedObjects.get(userId).destroy();
+            if (this.attachedObjects.has(userId)) { this.attachedObjects.get(userId).destroy(); }
             this.attachedObjects.delete(userId);
             return;
         }
-        else if (objectId == "moveup!") {
-            if (this.attachedObjects.has(userId))
+        else if (objectId === "moveup!") {
+            if (this.attachedObjects.has(userId)) {
                 this.attachedObjects.get(userId).transform.local.position.y += 0.01;
+            }
             return;
         }
-        else if (objectId == "movedown!") {
-            if (this.attachedObjects.has(userId))
+        else if (objectId === "movedown!") {
+            if (this.attachedObjects.has(userId)) {
                 this.attachedObjects.get(userId).transform.local.position.y -= 0.01;
+            }
             return;
         }
-        else if (objectId == "moveforward!") {
-            if (this.attachedObjects.has(userId))
+        else if (objectId === "moveforward!") {
+            if (this.attachedObjects.has(userId)) {
                 this.attachedObjects.get(userId).transform.local.position.z += 0.01;
+            }
             return;
         }
-        else if (objectId == "moveback!") {
-            if (this.attachedObjects.has(userId))
+        else if (objectId === "moveback!") {
+            if (this.attachedObjects.has(userId)) {
                 this.attachedObjects.get(userId).transform.local.position.z -= 0.01;
+            }
             return;
         }
-        else if (objectId == "sizeup!") {
+        else if (objectId === "sizeup!") {
             if (this.attachedObjects.has(userId)){
                 this.attachedObjects.get(userId).transform.local.scale.x += 0.02;
                 this.attachedObjects.get(userId).transform.local.scale.y += 0.02;
@@ -214,7 +218,7 @@ export default class WearAHat {
             }
             return;
         }
-        else if (objectId == "sizedown!") {
+        else if (objectId === "sizedown!") {
             if (this.attachedObjects.has(userId)){
                 this.attachedObjects.get(userId).transform.local.scale.x -= 0.02;
                 this.attachedObjects.get(userId).transform.local.scale.y -= 0.02;
@@ -224,21 +228,21 @@ export default class WearAHat {
         }
 
         // If the user is wearing a hat, destroy it.
-        if (this.attachedObjects.has(userId)) this.attachedObjects.get(userId).destroy();
+        if (this.attachedObjects.has(userId)) { this.attachedObjects.get(userId).destroy(); }
         this.attachedObjects.delete(userId);
 
-        const objectRecord = this.ObjectDatabase[objectId];
+        const objRecord = this.ObjectDatabase[objectId];
 
         // Create the hat model and attach it to the avatar's head.
         // Jimmy
 
-        const position = objectRecord.position ? objectRecord.position : { x: 0, y: 0, z: 0 }
-        const scale = objectRecord.scale ? objectRecord.scale : { x: 1.5, y: 1.5, z: 1.5 }
-        const rotation = objectRecord.rotation ? objectRecord.rotation : { x: 0, y: 180, z: 0 }
-        const attachPoint = <MRE.AttachPoint> (objectRecord.attachPoint ? objectRecord.attachPoint : 'head')
+        const position = objRecord.position ? objRecord.position : { x: 0, y: 0, z: 0 }
+        const scale = objRecord.scale ? objRecord.scale : { x: 1.5, y: 1.5, z: 1.5 }
+        const rotation = objRecord.rotation ? objRecord.rotation : { x: 0, y: 180, z: 0 }
+        const attachPoint = (objRecord.attachPoint ? objRecord.attachPoint : 'head') as MRE.AttachPoint;
 
         this.attachedObjects.set(userId, MRE.Actor.CreateFromLibrary(this.context, {
-            resourceId: objectRecord.resourceId,
+            resourceId: objRecord.resourceId,
             actor: {
                 transform: {
                     local: {

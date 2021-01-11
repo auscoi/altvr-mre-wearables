@@ -21,16 +21,16 @@ dotenv.config();
 // small delay is introduced allowing time for the debugger to attach before
 // the server starts accepting connections.
 function runApp() {
-  // Start listening for connections, and serve static files.
-  const server = new WebHost({
-    // baseUrl: 'http://<ngrok-id>.ngrok.io',
-    baseDir: resolvePath(__dirname, '../public'),
-    port: 3902,
-    permissions: [Permissions.UserInteraction, Permissions.UserTracking]
-  });
+	// Start listening for connections, and serve static files.
+	const server = new WebHost({
+		// baseUrl: 'http://<ngrok-id>.ngrok.io',
+		baseDir: resolvePath(__dirname, '../public'),
+		port: 3902,
+		permissions: [Permissions.UserInteraction, Permissions.UserTracking]
+	});
 
-  // Handle new application sessions
-  server.adapter.onConnection((context, params) => new App(context, params, server.baseUrl));
+	// Handle new application sessions
+	server.adapter.onConnection((context, params) => new App(context, params, server.baseUrl));
 }
 
 // Check whether code is running in a debuggable watched filesystem
@@ -44,7 +44,7 @@ const argv = process.execArgv.join();
 const isDebug = argv.includes('inspect') || argv.includes('debug');
 
 if (isDebug) {
-  setTimeout(runApp, delay);
+	setTimeout(runApp, delay);
 } else {
-  runApp();
+	runApp();
 }

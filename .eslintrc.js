@@ -26,19 +26,10 @@ module.exports = {
   ],
   "rules": {
     "block-spacing": ["warn", "always"],
-    "brace-style": ["warn", "1tbs", {"allowSingleLine": true}],
     "curly": ["warn", "all"],
     "default-param-last": "warn",
     "eol-last": ["warn", "always"],
     "eqeqeq": ["error", "always"],
-    "indent": [
-      "warn",
-      "tab",
-      {
-        "MemberExpression": "off",
-        "SwitchCase": 1
-      }
-    ],
     "linebreak-style": [
       "warn",
       "windows"
