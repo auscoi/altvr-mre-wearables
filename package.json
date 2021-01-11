@@ -15,13 +15,13 @@
     "node"
   ],
   "engines": {
-    "node": "=11.3.0",
-    "npm": "=6.11.3"
+    "node": ">=11.3.0",
+    "npm": ">=6.11.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "tsc --build --clean",
-    "build": "tsc --build",
+    "build": "tsc --build && eslint --ext .ts src",
     "build-only": "tsc --build",
     "build-watch": "tsc --build -w",
     "lint": "eslint --ext .ts src",
