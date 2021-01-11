@@ -25,6 +25,7 @@ function runApp() {
   const server = new WebHost({
     // baseUrl: 'http://<ngrok-id>.ngrok.io',
     baseDir: resolvePath(__dirname, '../public'),
+    port: 3902,
     permissions: [Permissions.UserInteraction, Permissions.UserTracking]
   });
 
